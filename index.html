@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="時間外記録">
+<meta name="theme-color" content="#EEF0F3">
+<title>時間外記録</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #EDE6CE;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    color: #2A2E35;
+    -webkit-user-select: none; user-select: none;
+  }
+  input { -webkit-user-select: text; user-select: text; }
+  button { font-family: inherit; }
+  .container {
+    max-width: 440px; margin: 0 auto;
+    padding: 16px 16px calc(40px + env(safe-area-inset-bottom));
+    padding-top: calc(16px + env(safe-area-inset-top));
+    background: #EDE6CE; min-height: 100vh;
+  }
+  .appHeader { text-align: center; font-size: 18px; font-weight: 700; padding: 10px 0; color: #7A6A3E; background: transparent; border: 2px solid #C4B583; border-radius: 12px; margin-bottom: 14px; }
+
+  /* 記録中カード */
+  .statusCard {
+    border-radius: 20px; border: 2px solid #D4C9A5; background: #F5F0DF;
+    padding: 30px 18px; margin-bottom: 16px; text-align: center;
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .statusNowLabel { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.9); margin-bottom: 10px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .statusRow { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
+  .statusRow svg { width: 26px; height: 26px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+  .statusLabel { font-size: 26px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
+  .statusTimer { font-size: 52px; font-weight: 800; letter-spacing: 1px; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 2px 6px rgba(0,0,0,.45); }
+  .idleWrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
+  .idleWrap svg { width: 30px; height: 30px; color: #B0A57F; }
+  .idleText { font-size: 17px; color: #8A7F5A; font-weight: 600; }
+
+  /* 記録中カードのメモ */
+  .activeMemoToggle {
+    margin-top: 14px; background: rgba(255,255,255,.2); color: #fff;
+    border: 1.5px solid rgba(255,255,255,.6); border-radius: 12px;
+    padding: 8px 18px; font-size: 14px; font-weight: 600; cursor: pointer;
+    max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .activeMemoBox { margin-top: 14px; background: rgba(255,255,255,.15); border-radius: 14px; padding: 12px; text-align: left; }
+  .memoQuickRow { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .activeMemoChip {
+    font-size: 13px; font-weight: 600; color: #fff; background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.5); border-radius: 16px; padding: 5px 12px; cursor: pointer;
+  }
+  .activeMemoChip.on { background: #fff !important; border-color: #fff !important; }
+  .memoInput {
+    width: 100%; font-size: 16px; padding: 9px 12px; border-radius: 10px;
+    border: 1px solid #E3E5E8; outline: none; background: #fff; color: #2A2E35;
+  }
+  .memoActions { display: flex; gap: 8px; margin-top: 8px; }
+  .activeMemoClear {
+    font-size: 13px; font-weight: 600; color: #fff; background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.5); border-radius: 10px; padding: 8px 14px; cursor: pointer;
+  }
+  .memoDone { flex: 1; font-size: 14px; font-weight: 700; color: #fff; border: none; border-radius: 10px; padding: 8px 14px; cursor: pointer; background: #fff; }
+
+  /* 業務ボタン */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .gridSmall { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .taskBtn {
+    border-radius: 16px; border: 2px solid; background: #fff;
+    padding: 20px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; cursor: pointer; min-height: 104px; transition: all .18s ease;
+  }
+  .taskBtn.small { padding: 14px 10px; min-height: 62px; flex-direction: row; gap: 8px; }
+  .taskBtn svg { width: 28px; height: 28px; }
+  .taskBtn.small svg { width: 22px; height: 22px; }
+  .taskLabel { font-size: 15px; font-weight: 700; text-align: center; line-height: 1.35; }
+  .taskBtn.small .taskLabel { font-size: 14px; }
+
+  /* 日付ナビ */
+  .dateNav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .navBtn { width: 42px; height: 42px; border-radius: 12px; border: 1px solid #E3E5E8; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .navBtn svg { width: 20px; height: 20px; color: #6B7280; }
+  .dateCenter { display: flex; align-items: center; gap: 8px; }
+  .dateCenter svg { width: 17px; height: 17px; color: #6B7280; }
+  .dateText { font-size: 18px; font-weight: 700; }
+  .todayBadge { font-size: 12px; font-weight: 700; color: #3B7DD8; background: rgba(59,125,216,.1); padding: 3px 8px; border-radius: 8px; }
+
+  /* 合計 */
+  .totalCard { background: #fff; border-radius: 18px; padding: 18px 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .totalHead { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .totalHead svg { width: 19px; height: 19px; color: #3A3F47; }
+  .totalTitle { font-size: 17px; font-weight: 700; }
+  .grandTotal { margin-left: auto; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .empty { text-align: center; color: #B0B6BD; font-size: 15px; padding: 26px 0; }
+  .totalList { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+  .totalItemHead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .miniDot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .totalItemLabel { font-size: 14px; font-weight: 600; color: #3A3F47; }
+  .totalItemVal { margin-left: auto; font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .barTrack { height: 8px; border-radius: 6px; background: #F0F1F4; overflow: hidden; }
+  .barFill { height: 100%; border-radius: 6px; transition: width .4s ease; }
+
+  /* 記録詳細 */
+  .logCard { background: #fff; border-radius: 18px; padding: 16px 12px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .logHead { font-size: 14px; font-weight: 700; color: #6B7280; padding: 0 4px 8px; }
+  .logRowWrap { border-top: 1px solid #F2F3F5; }
+  .logRow { display: flex; align-items: center; gap: 8px; padding: 9px 4px; }
+  .logLabel { font-size: 13.5px; font-weight: 600; color: #3A3F47; flex-shrink: 0; }
+  .logTime { font-size: 12.5px; color: #9AA1AA; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .logDur { margin-left: auto; font-size: 13.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .delBtn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; flex-shrink: 0; }
+  .delBtn svg { width: 15px; height: 15px; color: #B8BEC6; }
+  .memoShown { font-size: 13px; color: #6B7280; background: #F7F8FA; border-radius: 8px; padding: 6px 10px; margin: 0 4px 8px; }
+
+  /* 書き出し */
+  .exportBtn {
+    width: 100%; background: #2A2E35; color: #fff; border: none; border-radius: 16px;
+    padding: 17px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+  }
+  .exportBtn svg { width: 19px; height: 19px; }
+  .footNote { text-align: center; font-size: 12px; color: #A8AEB6; margin-top: 14px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// 業務の定義
+// ─────────────────────────────────────────────
+const TASKS = [
+  { id: "outlook", label: "Outlook＋マスター更新", icon: "mail",     color: "#3B7DD8", gradient: "repeating-linear-gradient(100deg, #3B7DD8 0px, #4A88DE 9px, #3172CE 18px, #4485DC 27px)" },
+  { id: "kaikake", label: "買掛金・リベート照合",   icon: "file",     color: "#E85B9A", gradient: "repeating-linear-gradient(100deg, #E85B9A 0px, #F27AB0 9px, #DE4A8C 18px, #EC66A2 27px)" },
+  { id: "claude",  label: "Claude",              icon: "sparkles", color: "#E8863B", gradient: "repeating-linear-gradient(100deg, #E8863B 0px, #F7A05C 9px, #D9752E 18px, #EC8F48 27px)" },
+  { id: "urikake", label: "売掛金関連",           icon: "receipt",  color: "#2E9E5B", gradient: "repeating-linear-gradient(100deg, #2E9E5B 0px, #4CB878 9px, #1F8047 18px, #3DAF67 27px)" },
+  { id: "hanbai",  label: "販売準備",             icon: "package",  color: "#8B5CD8", gradient: "repeating-linear-gradient(90deg, #8B5CD8 0 18px, #9B6FE0 18px 36px)" },
+  { id: "taiou",   label: "対応（電話・来客）",     icon: "phone",    color: "#A0603A", gradient: "repeating-linear-gradient(90deg, #A0603A 0 18px, #B47048 18px 36px)" },
+  { id: "kyukei",  label: "離席・休憩",           icon: "coffee",   color: "#5F6874", gradient: "repeating-linear-gradient(90deg, #5F6874 0 18px, #737C88 18px 36px)" },
+  { id: "sonota",  label: "その他",               icon: "settings", color: "#1E3A6B", gradient: "repeating-linear-gradient(90deg, #1E3A6B 0 18px, #2E4E85 18px 36px)" },
+];
+const TASK_MAP = {};
+TASKS.forEach(t => TASK_MAP[t.id] = t);
+const QUICK_MEMOS = ["電話", "来客", "確認中", "保留", "完了", "質問対応"];
+
+// ─────────────────────────────────────────────
+// アイコン（SVG・外部依存なし）
+// ─────────────────────────────────────────────
+const ICONS = {
+  mail: '<path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/>',
+  package: '<path d="M16.5 9.4L7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>',
+  receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M12 15h4"/>',
+  sparkles: '<path d="M9.94 14.32a1 1 0 0 0-1.88 0L7 17.5l-3.18 1.06a1 1 0 0 0 0 1.88L7 21.5l1.06 3.18a1 1 0 0 0 1.88 0"/><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>',
+  phone: '<path d="M13 2a9 9 0 0 1 9 9"/><path d="M13 6a5 5 0 0 1 5 5"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+  coffee: '<path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/>',
+  settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  play: '<polygon points="5 3 19 12 5 21 5 3"/>',
+  bar: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>',
+  download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  left: '<polyline points="15 18 9 12 15 6"/>',
+  right: '<polyline points="9 18 15 12 9 6"/>',
+  calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+};
+function icon(name, color) {
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="' + (color || 'currentColor') +
+    '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + ICONS[name] + '</svg>';
+}
+
+// ─────────────────────────────────────────────
+// IndexedDB
+// ─────────────────────────────────────────────
+const DB_NAME = "work-tracker-overtime-db", STORE = "sessions";
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        const os = db.createObjectStore(STORE, { keyPath: "id" });
+        os.createIndex("dateKey", "dateKey", { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function dbGetAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const req = db.transaction(STORE, "readonly").objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function dbPut(s) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put(s);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function dbDelete(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// ─────────────────────────────────────────────
+// 日付・時間ユーティリティ
+// ─────────────────────────────────────────────
+const WD = ["日","月","火","水","木","金","土"];
+const dateKeyOf = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const fmtHeader = d => (d.getMonth()+1) + "月" + d.getDate() + "日(" + WD[d.getDay()] + ")";
+const fmtClock = ms => { const d = new Date(ms); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); };
+function fmtDur(ms) {
+  const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h>0) return h + "時間" + String(m).padStart(2,"0") + "分";
+  if (m>0) return m + "分" + String(sec).padStart(2,"0") + "秒";
+  return sec + "秒";
+}
+function fmtDurClock(ms) {
+  const s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  return String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+}
+
+// ─────────────────────────────────────────────
+// アプリ状態
+// ─────────────────────────────────────────────
+const state = {
+  sessions: [],      // 終了済み
+  active: null,      // 稼働中
+  viewDate: new Date(),
+  now: Date.now(),
+  memoOpen: false,   // 記録中カードのメモ欄が開いてるか
+};
+let tick = null;
+
+async function boot() {
+  const all = await dbGetAll();
+  state.active = all.find(s => s.end == null) || null;
+  state.sessions = all.filter(s => s.end != null);
+  startTick();
+  render();
+}
+function startTick() {
+  if (tick) clearInterval(tick);
+  if (state.active) tick = setInterval(() => { state.now = Date.now(); updateTimer(); }, 1000);
+}
+
+// 業務ボタン
+async function handleTask(taskId) {
+  const ts = Date.now();
+  if (state.active) {
+    const finished = Object.assign({}, state.active, { end: ts });
+    await dbPut(finished);
+    state.sessions.push(finished);
+    if (state.active.taskId === taskId) { state.active = null; state.memoOpen = false; startTick(); render(); return; }
+  }
+  const fresh = { id: ts + "-" + Math.random().toString(36).slice(2,8), taskId, start: ts, end: null, dateKey: dateKeyOf(new Date(ts)), memo: "" };
+  await dbPut(fresh);
+  state.active = fresh;
+  state.now = ts;
+  state.memoOpen = false;
+  startTick();
+  render();
+}
+async function handleActiveMemo(memo) {
+  if (!state.active) return;
+  state.active.memo = memo;
+  await dbPut(state.active);
+}
+async function handleDelete(id) {
+  await dbDelete(id);
+  state.sessions = state.sessions.filter(s => s.id !== id);
+  render();
+}
+function shiftDate(delta) {
+  const d = new Date(state.viewDate);
+  d.setDate(d.getDate() + delta);
+  state.viewDate = d;
+  render();
+}
+
+// 書き出し
+function handleExport() {
+  const rows = [["日付","業務","開始","終了","経過(秒)","経過(表示)","メモ"]];
+  state.sessions.slice().sort((a,b)=>a.start-b.start).forEach(s => {
+    rows.push([s.dateKey, (TASK_MAP[s.taskId]||{}).label || s.taskId, fmtClock(s.start), fmtClock(s.end),
+      Math.round((s.end-s.start)/1000), fmtDurClock(s.end-s.start), s.memo || ""]);
+  });
+  const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(",")).join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "時間外記録_" + dateKeyOf(new Date()) + ".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// escape
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// タイマーだけ軽く更新（毎秒フル再描画を避ける）
+function updateTimer() {
+  if (!state.active) return;
+  const el = document.getElementById("statusTimer");
+  if (el) el.textContent = fmtDur(state.now - state.active.start);
+  // 稼働中の記録詳細の経過も更新
+  const rt = document.getElementById("runningDur");
+  if (rt) rt.textContent = fmtDur(state.now - state.active.start);
+}
+
+// ─────────────────────────────────────────────
+// 描画
+// ─────────────────────────────────────────────
+function render() {
+  const todayKey = dateKeyOf(new Date());
+  const viewKey = dateKeyOf(state.viewDate);
+  const isToday = viewKey === todayKey;
+  const activeTask = state.active ? TASK_MAP[state.active.taskId] : null;
+
+  const dayRecords = state.sessions.filter(s => s.dateKey === viewKey).sort((a,b)=>a.start-b.start);
+  const activeOnView = (state.active && dateKeyOf(new Date(state.active.start)) === viewKey) ? state.active : null;
+
+  const totals = {};
+  dayRecords.forEach(s => { totals[s.taskId] = (totals[s.taskId]||0) + (s.end - s.start); });
+  if (activeOnView) totals[activeOnView.taskId] = (totals[activeOnView.taskId]||0) + (state.now - activeOnView.start);
+  const totalOrder = TASKS.filter(t => totals[t.id] > 0);
+  const grandTotal = Object.values(totals).reduce((a,b)=>a+b,0);
+
+  let html = '<div class="container">';
+  html += '<div class="appHeader">時間外記録</div>';
+
+  // 記録中カード
+  if (activeTask) {
+    html += '<div class="statusCard" style="border-color:' + activeTask.color + ';background:' + (activeTask.gradient || activeTask.color) + '">';
+    html += '<div class="statusNowLabel">いま記録中</div>';
+    html += '<div class="statusRow">' + icon(activeTask.icon, "#fff") + '<span class="statusLabel">' + esc(activeTask.label) + '</span></div>';
+    html += '<div class="statusTimer" id="statusTimer">' + fmtDur(state.now - state.active.start) + '</div>';
+    if (!state.memoOpen) {
+      const label = state.active.memo ? ("📝 " + esc(state.active.memo)) : "＋ メモを追加";
+      html += '<button class="activeMemoToggle" onclick="openMemo()">' + label + '</button>';
+    } else {
+      html += '<div class="activeMemoBox">';
+      html += '<div class="memoQuickRow">';
+      QUICK_MEMOS.forEach(m => {
+        const on = state.active.memo === m ? ' on' : '';
+        const style = state.active.memo === m ? ' style="color:' + activeTask.color + '"' : '';
+        html += '<button class="activeMemoChip' + on + '"' + style + ' onclick="quickMemo(\'' + esc(m) + '\')">' + esc(m) + '</button>';
+      });
+      html += '</div>';
+      html += '<input class="memoInput" id="memoInput" placeholder="自由に入力（例：〇〇社の件）" value="' + esc(state.active.memo || "") + '" oninput="typeMemo(this.value)">';
+      html += '<div class="memoActions">';
+      html += '<button class="activeMemoClear" onclick="clearMemo()">消す</button>';
+      html += '<button class="memoDone" style="color:' + activeTask.color + '" onclick="closeMemo()">保存して閉じる</button>';
+      html += '</div></div>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div class="statusCard"><div class="idleWrap">' + icon("play") + '<span class="idleText">ボタンを押して開始</span></div></div>';
+  }
+
+  // 業務ボタン（上6）
+  html += '<div class="grid">';
+  TASKS.slice(0,6).forEach(t => html += taskBtn(t, state.active && state.active.taskId === t.id, false));
+  html += '</div>';
+  // 下2
+  html += '<div class="gridSmall">';
+  TASKS.slice(6).forEach(t => html += taskBtn(t, state.active && state.active.taskId === t.id, true));
+  html += '</div>';
+
+  // 日付ナビ
+  html += '<div class="dateNav">';
+  html += '<button class="navBtn" onclick="shiftDate(-1)">' + icon("left") + '</button>';
+  html += '<div class="dateCenter">' + icon("calendar") + '<span class="dateText">' + fmtHeader(state.viewDate) + '</span>' + (isToday ? '<span class="todayBadge">今日</span>' : '') + '</div>';
+  html += '<button class="navBtn" style="opacity:' + (isToday ? '.35' : '1') + '" onclick="' + (isToday ? '' : 'shiftDate(1)') + '">' + icon("right") + '</button>';
+  html += '</div>';
+
+  // 合計
+  html += '<div class="totalCard"><div class="totalHead">' + icon("bar") + '<span class="totalTitle">合計</span>' + (grandTotal > 0 ? '<span class="grandTotal">' + fmtDur(grandTotal) + '</span>' : '') + '</div>';
+  if (totalOrder.length === 0) {
+    html += '<div class="empty">記録がありません</div>';
+  } else {
+    html += '<div class="totalList">';
+    totalOrder.forEach(t => {
+      const ms = totals[t.id], pct = grandTotal > 0 ? (ms/grandTotal*100) : 0;
+      html += '<div><div class="totalItemHead"><span class="miniDot" style="background:' + t.color + '"></span><span class="totalItemLabel">' + esc(t.label) + '</span><span class="totalItemVal" style="color:' + t.color + '">' + fmtDur(ms) + '</span></div>';
+      html += '<div class="barTrack"><div class="barFill" style="width:' + pct + '%;background:' + t.color + '"></div></div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // 記録詳細
+  if (dayRecords.length > 0 || activeOnView) {
+    html += '<div class="logCard"><div class="logHead">記録の詳細</div>';
+    if (activeOnView) html += logRow(TASK_MAP[activeOnView.taskId], activeOnView.start, state.now, true, activeOnView.memo, null);
+    dayRecords.slice().reverse().forEach(s => html += logRow(TASK_MAP[s.taskId], s.start, s.end, false, s.memo, s.id));
+    html += '</div>';
+  }
+
+  // 書き出し
+  html += '<button class="exportBtn" onclick="handleExport()">' + icon("download") + '記録を書き出す（月末にクロードへ）</button>';
+  html += '<div class="footNote">記録はこのiPhoneの中に保存され、アプリを閉じても消えません。</div>';
+  html += '</div>';
+
+  document.getElementById("root").innerHTML = html;
+
+  // メモ欄を開いたらフォーカス
+  if (state.memoOpen) {
+    const inp = document.getElementById("memoInput");
+    if (inp) { const v = inp.value; inp.focus(); inp.setSelectionRange(v.length, v.length); }
+  }
+}
+
+function taskBtn(t, running, small) {
+  const bg = running ? (t.gradient || t.color) : "#fff";
+  const shadow = running ? "0 4px 14px " + t.color + "55" : "0 1px 3px rgba(0,0,0,.05)";
+  const fg = running ? "#fff" : t.color;
+  const tsh = running ? ";text-shadow:0 1px 3px rgba(0,0,0,0.45)" : "";
+  return '<button class="taskBtn' + (small ? ' small' : '') + '" style="border-color:' + t.color + ';background:' + bg + ';box-shadow:' + shadow + '" onclick="handleTask(\'' + t.id + '\')">' +
+    icon(t.icon, fg) + '<span class="taskLabel" style="color:' + fg + tsh + '">' + esc(t.label) + '</span></button>';
+}
+
+function logRow(task, start, end, running, memo, id) {
+  let h = '<div class="logRowWrap"><div class="logRow">';
+  h += '<span class="miniDot" style="background:' + task.color + '"></span>';
+  h += '<span class="logLabel">' + esc(task.label) + '</span>';
+  h += '<span class="logTime">' + fmtClock(start) + (running ? ' 〜 稼働中' : ' 〜 ' + fmtClock(end)) + '</span>';
+  h += '<span class="logDur"' + (running ? ' id="runningDur"' : '') + ' style="color:' + task.color + '">' + fmtDur(end - start) + '</span>';
+  if (id) h += '<button class="delBtn" onclick="handleDelete(\'' + id + '\')">' + icon("trash") + '</button>';
+  h += '</div>';
+  if (memo) h += '<div class="memoShown">📝 ' + esc(memo) + '</div>';
+  h += '</div>';
+  return h;
+}
+
+// メモ操作
+function openMemo(){ state.memoOpen = true; render(); }
+function closeMemo(){ handleActiveMemo(state.active ? state.active.memo : ""); state.memoOpen = false; render(); }
+function quickMemo(m){ if (!state.active) return; state.active.memo = (state.active.memo === m ? "" : m); handleActiveMemo(state.active.memo); render(); }
+function typeMemo(v){ if (!state.active) return; state.active.memo = v; handleActiveMemo(v); }
+function clearMemo(){ if (!state.active) return; state.active.memo = ""; handleActiveMemo(""); render(); }
+
+// 起動
+boot();
+</script>
+</body>
+</html>
