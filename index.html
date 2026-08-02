@@ -33,11 +33,11 @@
     padding: 30px 18px; margin-bottom: 16px; text-align: center;
     transition: background .25s ease, border-color .25s ease;
   }
-  .statusNowLabel { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.9); margin-bottom: 10px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .statusNowLabel { font-size: 15px; font-weight: 600; color: rgba(255,255,255,.9); margin-bottom: 10px; }
   .statusRow { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px; }
-  .statusRow svg { width: 26px; height: 26px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
-  .statusLabel { font-size: 26px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
-  .statusTimer { font-size: 52px; font-weight: 800; letter-spacing: 1px; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 2px 6px rgba(0,0,0,.45); }
+  .statusRow svg { width: 26px; height: 26px; }
+  .statusLabel { font-size: 26px; font-weight: 800; color: #fff; }
+  .statusTimer { font-size: 52px; font-weight: 800; letter-spacing: 1px; line-height: 1.1; color: #fff; font-variant-numeric: tabular-nums; }
   .idleWrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 0; }
   .idleWrap svg { width: 30px; height: 30px; color: #B0A57F; }
   .idleText { font-size: 17px; color: #8A7F5A; font-weight: 600; }
@@ -91,7 +91,7 @@
   .todayBadge { font-size: 12px; font-weight: 700; color: #3B7DD8; background: rgba(59,125,216,.1); padding: 3px 8px; border-radius: 8px; }
 
   /* 合計 */
-  .totalCard { background: #fff; border-radius: 18px; padding: 18px 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .totalCard { background: #fff; border-radius: 18px; padding: 18px 16px; margin-bottom: 16px; }
   .totalHead { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .totalHead svg { width: 19px; height: 19px; color: #3A3F47; }
   .totalTitle { font-size: 17px; font-weight: 700; }
@@ -106,7 +106,7 @@
   .barFill { height: 100%; border-radius: 6px; transition: width .4s ease; }
 
   /* 記録詳細 */
-  .logCard { background: #fff; border-radius: 18px; padding: 16px 12px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+  .logCard { background: #fff; border-radius: 18px; padding: 16px 12px; margin-bottom: 18px; }
   .logHead { font-size: 14px; font-weight: 700; color: #6B7280; padding: 0 4px 8px; }
   .logRowWrap { border-top: 1px solid #F2F3F5; }
   .logRow { display: flex; align-items: center; gap: 8px; padding: 9px 4px; }
@@ -134,18 +134,20 @@
 // 業務の定義
 // ─────────────────────────────────────────────
 const TASKS = [
-  { id: "outlook", label: "Outlook＋マスター更新", icon: "mail",     color: "#3B7DD8", gradient: "repeating-linear-gradient(100deg, #3B7DD8 0px, #4A88DE 9px, #3172CE 18px, #4485DC 27px)" },
-  { id: "kaikake", label: "買掛金・リベート照合",   icon: "file",     color: "#E85B9A", gradient: "repeating-linear-gradient(100deg, #E85B9A 0px, #F27AB0 9px, #DE4A8C 18px, #EC66A2 27px)" },
-  { id: "claude",  label: "Claude",              icon: "sparkles", color: "#E8863B", gradient: "repeating-linear-gradient(100deg, #E8863B 0px, #F7A05C 9px, #D9752E 18px, #EC8F48 27px)" },
-  { id: "urikake", label: "売掛金関連",           icon: "receipt",  color: "#2E9E5B", gradient: "repeating-linear-gradient(100deg, #2E9E5B 0px, #4CB878 9px, #1F8047 18px, #3DAF67 27px)" },
-  { id: "hanbai",  label: "販売準備",             icon: "package",  color: "#8B5CD8", gradient: "repeating-linear-gradient(90deg, #8B5CD8 0 18px, #9B6FE0 18px 36px)" },
-  { id: "taiou",   label: "対応（電話・来客）",     icon: "phone",    color: "#A0603A", gradient: "repeating-linear-gradient(90deg, #A0603A 0 18px, #B47048 18px 36px)" },
-  { id: "kyukei",  label: "離席・休憩",           icon: "coffee",   color: "#5F6874", gradient: "repeating-linear-gradient(90deg, #5F6874 0 18px, #737C88 18px 36px)" },
-  { id: "sonota",  label: "その他",               icon: "settings", color: "#1E3A6B", gradient: "repeating-linear-gradient(90deg, #1E3A6B 0 18px, #2E4E85 18px 36px)" },
+  { id: "outlook", label: "Outlook＋マスター更新", icon: "mail",     color: "#3B7DD8" },
+  { id: "kaikake", label: "買掛金・リベート照合",   icon: "file",     color: "#E85B9A" },
+  { id: "hanbai",  label: "販売準備",             icon: "package",  color: "#8B5CD8" },
+  { id: "urikake", label: "売掛金関連",           icon: "receipt",  color: "#2E9E5B" },
+  { id: "claude",  label: "Claude",              icon: "sparkles", color: "#E8863B" },
+  { id: "taiou",   label: "対応（電話・来客）",     icon: "phone",    color: "#A0603A" },
+  { id: "kyukei",  label: "離席・休憩",           icon: "coffee",   color: "#5F6874" },
+  { id: "sonota",  label: "その他",               icon: "settings", color: "#1E3A6B" },
 ];
 const TASK_MAP = {};
 TASKS.forEach(t => TASK_MAP[t.id] = t);
-const QUICK_MEMOS = ["電話", "来客", "確認中", "保留", "完了", "質問対応"];
+// 学習式メモ：業務ごとに、その業務で使ったメモが候補として溜まる（入力した順・新しいのが左）
+let memoHistory = {};  // { taskId: ["三菱","山星屋",...], ... }
+const MEMO_LIMIT = 30; // 業務ごとの候補の最大表示数
 
 // ─────────────────────────────────────────────
 // アイコン（SVG・外部依存なし）
@@ -155,7 +157,7 @@ const ICONS = {
   file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/>',
   package: '<path d="M16.5 9.4L7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05"/><path d="M12 22.08V12"/>',
   receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M12 15h4"/>',
-  sparkles: '<path d="M9.94 14.32a1 1 0 0 0-1.88 0L7 17.5l-3.18 1.06a1 1 0 0 0 0 1.88L7 21.5l1.06 3.18a1 1 0 0 0 1.88 0"/><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/>',
+  sparkles: '<path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6z"/><path d="M5 15l.7 2.3L8 18l-2.3.7L5 21l-.7-2.3L2 18l2.3-.7z"/><path d="M18 3l.5 1.7L20 5.5l-1.5.5L18 8l-.5-1.7L16 5.5l1.5-.5z"/>',
   phone: '<path d="M13 2a9 9 0 0 1 9 9"/><path d="M13 6a5 5 0 0 1 5 5"/><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
   coffee: '<path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
@@ -216,6 +218,15 @@ async function dbDelete(id) {
     tx.onerror = () => reject(tx.error);
   });
 }
+async function dbClearAll() {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
 
 // ─────────────────────────────────────────────
 // 日付・時間ユーティリティ
@@ -251,8 +262,28 @@ async function boot() {
   const all = await dbGetAll();
   state.active = all.find(s => s.end == null) || null;
   state.sessions = all.filter(s => s.end != null);
+  rebuildMemoHistory(all);
   startTick();
   render();
+}
+// 全記録から業務ごとのメモ候補を組み立てる（新しいのが左・重複なし）
+function rebuildMemoHistory(all) {
+  const map = {};
+  [...all].sort((a, b) => b.start - a.start).forEach(s => {
+    const m = (s.memo || "").trim();
+    if (!m) return;
+    if (!map[s.taskId]) map[s.taskId] = [];
+    if (!map[s.taskId].includes(m)) map[s.taskId].push(m);
+  });
+  Object.keys(map).forEach(k => { map[k] = map[k].slice(0, MEMO_LIMIT); });
+  memoHistory = map;
+}
+// メモを候補の先頭へ（その業務の候補として、新しいのが左に来る・重複なし）
+function pushMemoHistory(taskId, memo) {
+  const m = (memo || "").trim();
+  if (!m) return;
+  const cur = memoHistory[taskId] || [];
+  memoHistory[taskId] = [m, ...cur.filter(x => x !== m)].slice(0, MEMO_LIMIT);
 }
 function startTick() {
   if (tick) clearInterval(tick);
@@ -284,6 +315,16 @@ async function handleActiveMemo(memo) {
 async function handleDelete(id) {
   await dbDelete(id);
   state.sessions = state.sessions.filter(s => s.id !== id);
+  render();
+}
+async function handleClearAll() {
+  if (!confirm("これまでの記録をすべて消します。よろしいですか？（元に戻せません）")) return;
+  await dbClearAll();
+  state.sessions = [];
+  state.active = null;
+  memoHistory = {};
+  state.memoOpen = false;
+  startTick();
   render();
 }
 function shiftDate(delta) {
@@ -345,7 +386,7 @@ function render() {
 
   // 記録中カード
   if (activeTask) {
-    html += '<div class="statusCard" style="border-color:' + activeTask.color + ';background:' + (activeTask.gradient || activeTask.color) + '">';
+    html += '<div class="statusCard" style="border-color:' + activeTask.color + ';background:' + activeTask.color + '">';
     html += '<div class="statusNowLabel">いま記録中</div>';
     html += '<div class="statusRow">' + icon(activeTask.icon, "#fff") + '<span class="statusLabel">' + esc(activeTask.label) + '</span></div>';
     html += '<div class="statusTimer" id="statusTimer">' + fmtDur(state.now - state.active.start) + '</div>';
@@ -354,14 +395,17 @@ function render() {
       html += '<button class="activeMemoToggle" onclick="openMemo()">' + label + '</button>';
     } else {
       html += '<div class="activeMemoBox">';
-      html += '<div class="memoQuickRow">';
-      QUICK_MEMOS.forEach(m => {
-        const on = state.active.memo === m ? ' on' : '';
-        const style = state.active.memo === m ? ' style="color:' + activeTask.color + '"' : '';
-        html += '<button class="activeMemoChip' + on + '"' + style + ' onclick="quickMemo(\'' + esc(m) + '\')">' + esc(m) + '</button>';
-      });
-      html += '</div>';
-      html += '<input class="memoInput" id="memoInput" placeholder="自由に入力（例：〇〇社の件）" value="' + esc(state.active.memo || "") + '" oninput="typeMemo(this.value)">';
+      const cands = memoHistory[state.active.taskId] || [];
+      if (cands.length > 0) {
+        html += '<div class="memoQuickRow">';
+        cands.forEach(m => {
+          const on = state.active.memo === m ? ' on' : '';
+          const style = state.active.memo === m ? ' style="color:' + activeTask.color + '"' : '';
+          html += '<button class="activeMemoChip' + on + '"' + style + ' onclick="quickMemo(\'' + esc(m) + '\')">' + esc(m) + '</button>';
+        });
+        html += '</div>';
+      }
+      html += '<input class="memoInput" id="memoInput" placeholder="短く入力（例：三菱）" value="' + esc(state.active.memo || "") + '" oninput="typeMemo(this.value)">';
       html += '<div class="memoActions">';
       html += '<button class="activeMemoClear" onclick="clearMemo()">消す</button>';
       html += '<button class="memoDone" style="color:' + activeTask.color + '" onclick="closeMemo()">保存して閉じる</button>';
@@ -426,10 +470,10 @@ function render() {
 }
 
 function taskBtn(t, running, small) {
-  const bg = running ? (t.gradient || t.color) : "#fff";
-  const shadow = running ? "0 4px 14px " + t.color + "55" : "0 1px 3px rgba(0,0,0,.05)";
+  const bg = running ? t.color : "#fff";
+  const shadow = "none";
   const fg = running ? "#fff" : t.color;
-  const tsh = running ? ";text-shadow:0 1px 3px rgba(0,0,0,0.45)" : "";
+  const tsh = "";
   return '<button class="taskBtn' + (small ? ' small' : '') + '" style="border-color:' + t.color + ';background:' + bg + ';box-shadow:' + shadow + '" onclick="handleTask(\'' + t.id + '\')">' +
     icon(t.icon, fg) + '<span class="taskLabel" style="color:' + fg + tsh + '">' + esc(t.label) + '</span></button>';
 }
@@ -449,7 +493,14 @@ function logRow(task, start, end, running, memo, id) {
 
 // メモ操作
 function openMemo(){ state.memoOpen = true; render(); }
-function closeMemo(){ handleActiveMemo(state.active ? state.active.memo : ""); state.memoOpen = false; render(); }
+function closeMemo(){
+  if (state.active) {
+    handleActiveMemo(state.active.memo);
+    pushMemoHistory(state.active.taskId, state.active.memo);
+  }
+  state.memoOpen = false;
+  render();
+}
 function quickMemo(m){ if (!state.active) return; state.active.memo = (state.active.memo === m ? "" : m); handleActiveMemo(state.active.memo); render(); }
 function typeMemo(v){ if (!state.active) return; state.active.memo = v; handleActiveMemo(v); }
 function clearMemo(){ if (!state.active) return; state.active.memo = ""; handleActiveMemo(""); render(); }
